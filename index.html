@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrata Merci — Fresenius Kabi Italia</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#003DA5;--blue-l:#E8EFFE;--blue-d:#002D7A;
+  --green:#00A550;--green-l:#E6F7EE;
+  --red:#C8102E;--red-l:#FCEEF0;
+  --amber:#F59B00;--amber-l:#FEF6E4;
+  --gray:#F4F5F7;--border:#E2E6ED;
+  --text:#1A2233;--muted:#6B7A99;
+  --font:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+body{font-family:var(--font);color:var(--text);background:#EEF1F7;min-height:100vh;padding:24px 16px;}
+.app{max-width:980px;margin:0 auto;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:var(--blue);border-radius:12px 12px 0 0;}
+.hl{display:flex;align-items:center;gap:12px;}
+.hico{width:38px;height:38px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.htit{font-size:15px;font-weight:600;color:white;}
+.hsub{font-size:11px;color:rgba(255,255,255,0.6);font-family:var(--mono);margin-top:2px;}
+.hright{display:flex;align-items:center;gap:10px;}
+.hbadge{font-size:10px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);padding:3px 10px;border-radius:20px;font-family:var(--mono);}
+.api-status{font-size:10px;padding:4px 10px;border-radius:20px;font-family:var(--mono);font-weight:600;background:#00A550;color:white;}
+.main{background:white;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;display:grid;grid-template-columns:1fr 1fr;min-height:620px;}
+.col{padding:22px;}
+.col-left{border-right:1px solid var(--border);}
+.col-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;background:var(--gray);position:relative;transition:all .2s;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--blue);background:var(--blue-l);}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-icon{font-size:30px;margin-bottom:10px;}
+.drop-lbl{font-size:14px;font-weight:500;}
+.drop-hint{font-size:12px;color:var(--muted);margin-top:4px;}
+.drop-fmts{display:flex;gap:5px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.fmt{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:3px;background:white;border:1px solid var(--border);color:var(--muted);}
+.doc-preview{display:none;flex-direction:column;gap:10px;}
+.doc-img-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#f9f9f9;cursor:zoom-in;}
+.doc-img-wrap img{width:100%;max-height:420px;object-fit:contain;display:block;}
+.doc-img-wrap.zoomed{position:fixed;inset:0;z-index:9999;border-radius:0;cursor:zoom-out;background:rgba(0,0,0,0.93);display:flex;align-items:center;justify-content:center;overflow:auto;}
+.doc-img-wrap.zoomed img{max-height:95vh;width:auto;max-width:95vw;object-fit:contain;}
+.zoom-hint{font-size:10px;color:var(--muted);text-align:center;}
+.doc-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--gray);border-radius:6px;border:1px solid var(--border);}
+.doc-fname{font-size:11px;font-family:var(--mono);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;}
+.doc-link{font-size:11px;color:var(--blue);cursor:pointer;text-decoration:underline;white-space:nowrap;}
+.analyzing{display:none;text-align:center;padding:40px 20px;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.an-lbl{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;}
+.an-step{font-size:12px;color:var(--blue);font-family:var(--mono);}
+.an-model{font-size:10px;color:var(--muted);margin-top:4px;}
+.result-section{margin-bottom:14px;}
+.rs-title{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:10px;}
+.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field{background:var(--gray);border-radius:7px;padding:10px 12px;border:1px solid var(--border);}
+.field.ok{border-color:#B0DFC5;background:var(--green-l);}
+.field.warn{border-color:#F5D78E;background:var(--amber-l);}
+.field.na{background:#F9FAFB;}
+.field.full{grid-column:1/-1;}
+.fl{font-size:9px;font-weight:700;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:4px;}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;}
+.dot-ok{background:var(--green);}.dot-warn{background:var(--amber);}.dot-na{background:#C4CBD8;}
+.fi{width:100%;border:1px solid transparent;border-radius:4px;padding:5px 7px;font-size:14px;font-family:var(--mono);background:transparent;color:var(--text);outline:none;transition:all .15s;}
+.fi:focus{border-color:var(--blue);background:white;}
+.fi.na-val{font-size:12px;color:var(--muted);font-family:var(--font);font-style:italic;}
+.fhint{font-size:10px;margin-top:3px;}
+.fhint.warn{color:#A07000;}.fhint.ok{color:#1A7A4A;}
+.lotto-box{background:var(--blue-l);border:1px solid #C5D3F5;border-radius:6px;padding:8px 12px;margin-top:6px;}
+.lotto-label{font-size:9px;font-weight:700;letter-spacing:.07em;color:var(--blue);text-transform:uppercase;margin-bottom:3px;}
+.lotto-val{font-size:14px;font-family:var(--mono);font-weight:500;color:var(--blue);}
+.status-bar{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;margin-bottom:12px;margin-top:14px;}
+.status-bar.ok{background:var(--green-l);border:1px solid #90D4A8;}
+.status-bar.warn{background:var(--amber-l);border:1px solid #F0D080;}
+.status-bar.err{background:var(--red-l);border:1px solid #F0B8C1;}
+.status-bar.idle{background:var(--gray);border:1px solid var(--border);}
+.sico{font-size:18px;}
+.stxt{font-size:12px;font-weight:500;line-height:1.4;}
+.stxt.ok{color:#1A7A4A;}.stxt.warn{color:#7A5000;}.stxt.err{color:var(--red);}.stxt.idle{color:var(--muted);}
+.btn-row{display:flex;gap:8px;}
+.btn{padding:11px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:all .15s;flex:1;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-sec{background:var(--gray);color:var(--text);border:1px solid var(--border);}
+.btn-sec:hover:not(:disabled){background:var(--border);}
+.btn-pri{background:var(--blue);color:white;}
+.btn-pri:hover:not(:disabled){background:var(--blue-d);}
+.btn-grn{background:var(--green);color:white;}
+.btn-grn:hover:not(:disabled){background:#007A3A;}
+.placeholder{text-align:center;padding:60px 20px;color:var(--muted);}
+.ph-icon{font-size:38px;margin-bottom:12px;}
+.ph-title{font-size:14px;font-weight:500;margin-bottom:6px;color:var(--text);}
+.ph-sub{font-size:12px;line-height:1.5;}
+.toast{position:fixed;bottom:24px;right:24px;background:#1A2233;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:99999;box-shadow:0 4px 24px rgba(0,0,0,0.3);display:none;}
+.dbg{background:#1a2233;border-radius:6px;padding:10px;font-size:10px;font-family:monospace;color:#a8b8d0;max-height:100px;overflow-y:auto;white-space:pre-wrap;margin-top:8px;display:none;}
+@media(max-width:720px){.main{grid-template-columns:1fr;}.col-left{border-right:none;border-bottom:1px solid var(--border);}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="hl">
+      <div class="hico">📄</div>
+      <div>
+        <div class="htit">Entrata Merci — Lettore DDT</div>
+        <div class="hsub">Fresenius Kabi Italia S.R.L. · Isola della Scala (VR)</div>
+      </div>
+    </div>
+    <div class="hright">
+      <div class="api-status" id="apiStatus" style="background:#6B7A99;">⬤ Inizializzazione...</div>
+      <div class="hbadge" id="modelBadge">Inizializzazione...</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- COLONNA SX -->
+    <div class="col col-left">
+      <div class="col-title">
+        <span>📄 Documento DDT</span>
+        <span id="tipoBadge" style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--blue-l);color:var(--blue);display:none;text-transform:none;letter-spacing:0;font-weight:600;"></span>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*,application/pdf"/>
+        <div class="drop-icon">📁</div>
+        <div class="drop-lbl">Trascina il DDT scansionato</div>
+        <div class="drop-hint">oppure clicca per selezionare</div>
+        <div class="drop-fmts">
+          <span class="fmt">JPG</span><span class="fmt">PNG</span>
+          <span class="fmt">PDF</span><span class="fmt">BMP</span>
+        </div>
+      </div>
+
+      <div class="analyzing" id="analyzingBox">
+        <div class="spinner"></div>
+        <div class="an-lbl">Analisi AI in corso...</div>
+        <div class="an-step" id="anStep">Preparazione</div>
+        <div class="an-model" id="anModel"></div>
+      </div>
+
+      <div class="doc-preview" id="docPreview">
+        <div class="doc-img-wrap" id="docImgWrap" onclick="toggleZoom()">
+          <img id="docImg" src="" alt="DDT"/>
+        </div>
+        <div class="zoom-hint">🔍 Clicca per ingrandire</div>
+        <div class="doc-bar">
+          <span class="doc-fname" id="docFname">—</span>
+          <div style="display:flex;gap:10px;">
+            <span class="doc-link" onclick="reanalyze()">🔄 Rianalizza</span>
+            <span class="doc-link" onclick="newDoc()">↩ Nuovo</span>
+          </div>
+        </div>
+        <div class="dbg" id="dbgBox"></div>
+      </div>
+    </div>
+
+    <!-- COLONNA DX -->
+    <div class="col">
+      <div class="col-title">✏️ Dati estratti — verifica e correggi</div>
+
+      <div class="placeholder" id="placeholder">
+        <div class="ph-icon">⬅️</div>
+        <div class="ph-title">Carica un DDT</div>
+        <div class="ph-sub">L'AI estrarrà automaticamente tutti i campi per SAP</div>
+      </div>
+
+      <div id="fieldsArea" style="display:none;">
+        <div class="result-section">
+          <div class="rs-title">Documento</div>
+          <div class="fields-grid">
+            <div class="field full" id="fc_fornitore">
+              <div class="fl"><span class="dot dot-ok"></span>Fornitore</div>
+              <input class="fi" id="f_fornitore" type="text" oninput="onEdit(this)"/>
+            </div>
+            <div class="field" id="fc_nddt">
+              <div class="fl"><span class="dot dot-ok"></span>N° DDT</div>
+              <input class="fi" id="f_nddt" type="text" oninput="onEdit(this)"/>
+            </div>
+            <div class="field" id="fc_data">
+              <div class="fl"><span class="dot dot-ok"></span>Data Documento</div>
+              <input class="fi" id="f_data" type="text" oninput="onEdit(this)"/>
+              <div class="fhint warn" id="fh_data" style="display:none">⚠ Verifica la data</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="rs-title">Ordine</div>
+          <div class="fields-grid">
+            <div class="field" id="fc_sap">
+              <div class="fl"><span class="dot dot-ok"></span>Ordine SAP</div>
+              <input class="fi" id="f_sap" type="text" oninput="onEdit(this)"/>
+              <div class="fhint warn" id="fh_sap" style="display:none">⚠ Formato atteso: 10 cifre</div>
+            </div>
+            <div class="field" id="fc_ordforn">
+              <div class="fl"><span class="dot dot-ok"></span>Ordine Fornitore</div>
+              <input class="fi" id="f_ordforn" type="text" oninput="onEdit(this)"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="rs-title">Materiale</div>
+          <div class="fields-grid">
+            <div class="field" id="fc_codart">
+              <div class="fl"><span class="dot dot-ok"></span>Codice Articolo</div>
+              <input class="fi" id="f_codart" type="text" oninput="onEdit(this)"/>
+            </div>
+            <div class="field" id="fc_qty">
+              <div class="fl"><span class="dot dot-ok"></span>Quantità</div>
+              <input class="fi" id="f_qty" type="text" oninput="onEdit(this)"/>
+              <div class="fhint ok" id="fh_qty" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="sec_lotto" style="display:none;">
+          <div class="result-section">
+            <div class="rs-title">Lotto e Scadenza</div>
+            <div class="fields-grid">
+              <div class="field" id="fc_lotto">
+                <div class="fl"><span class="dot dot-ok"></span>Lotto Fornitore</div>
+                <input class="fi" id="f_lotto" type="text" oninput="onEdit(this);genLotto()"/>
+              </div>
+              <div class="field" id="fc_scad">
+                <div class="fl"><span class="dot dot-ok"></span>Data Scadenza</div>
+                <input class="fi" id="f_scad" type="text" oninput="onEdit(this)"/>
+                <div class="fhint warn" id="fh_scad" style="display:none">⚠ Scadenza passata!</div>
+              </div>
+              <div class="field full" id="fc_lottoint" style="display:none;">
+                <div class="fl"><span class="dot dot-ok"></span>Lotto Interno Generato</div>
+                <div class="lotto-box">
+                  <div class="lotto-label">Lotto interno FK</div>
+                  <div class="lotto-val" id="lottoInterno">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-bar idle" id="statusBar">
+          <span class="sico">📋</span>
+          <span class="stxt idle">Verifica i dati estratti</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-sec" onclick="newDoc()">↩ Nuovo DDT</button>
+          <button class="btn btn-grn" onclick="copyForSAP()">📋 Copia per SAP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">✓ Dati copiati — incolla in SAP</div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIGURAZIONE — chiave e modelli
+// ═══════════════════════════════════════
+const API_KEY = 'AIzaSyCq1m0awZTm0IQWbIVabCYcNhEk1euIlwE';
+
+// Feedback visivo immediato
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('modelBadge').textContent = 'Ricerca modello...';
+  document.getElementById('apiStatus').textContent = '⬤ Connessione...';
+  document.getElementById('apiStatus').style.background = '#F59B00';
+});
+
+// Lista modelli da provare in ordine
+const MODELS = [
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-flash',
+];
+
+let activeModel = null;
+let currentB64 = null;
+let currentMime = 'image/jpeg';
+let extractedData = null;
+let isZoomed = false;
+
+// ═══════════════════════════════════════
+// FIND WORKING MODEL ALL'AVVIO
+// ═══════════════════════════════════════
+async function findWorkingModel() {
+  dbg('Ricerca modello disponibile...');
+  for(const model of MODELS) {
+    dbg('Provo: ' + model);
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents:[{parts:[{text:'rispondi solo con la parola OK'}]}],
+          generationConfig:{maxOutputTokens:5,temperature:0}
+        })
+      });
+      if(r.ok) {
+        const d = await r.json();
+        const txt = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        dbg('✅ ' + model + ' risponde: ' + txt.trim());
+        activeModel = model;
+        document.getElementById('modelBadge').textContent = model;
+        document.getElementById('apiStatus').textContent = '⬤ Pronto — carica DDT';
+        document.getElementById('apiStatus').style.background = '#00A550';
+        return true;
+      } else {
+        dbg('❌ ' + model + ' HTTP ' + r.status);
+      }
+    } catch(e) {
+      dbg('❌ ' + model + ' errore: ' + e.message);
+    }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  return false;
+}
+
+// Avvia ricerca modello dopo caricamento completo
+window.addEventListener('load', () => setTimeout(() => findWorkingModel().then(ok => {
+  if(!ok) {
+    document.getElementById('apiStatus').textContent = '⬤ Nessun modello disponibile';
+    document.getElementById('apiStatus').style.background = '#C8102E';
+    document.getElementById('modelBadge').textContent = 'Errore connessione';
+    dbg('ERRORE: nessun modello raggiungibile');
+  }
+}), 800));
+
+function dbg(msg) {
+  console.log('[DDT]', msg);
+}
+
+// ═══════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════
+const fileInput = document.getElementById('fileInput');
+const dropZone  = document.getElementById('dropZone');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag');
+  if(!e.dataTransfer.files[0]) return;
+  if(!activeModel) { alert('Attendere il badge verde prima di caricare.'); return; }
+  handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if(!e.target.files[0]) return;
+  if(!activeModel) { alert('Attendere il badge verde prima di caricare.'); return; }
+  handleFile(e.target.files[0]);
+});
+
+async function handleFile(file) {
+  const isImg = file.type.startsWith('image/');
+  const isPDF = file.type === 'application/pdf';
+  if(!isImg && !isPDF) { alert('Usa JPG, PNG o PDF'); return; }
+
+  dropZone.style.display = 'none';
+  document.getElementById('fieldsArea').style.display = 'none';
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('docPreview').style.display = 'none';
+  document.getElementById('analyzingBox').style.display = 'block';
+  setAnStep('Lettura file...');
+
+  try {
+    let b64, mime;
+    if(isPDF) {
+      setAnStep('Rendering PDF...');
+      b64 = await pdfToJpeg(file); mime = 'image/jpeg';
+    } else {
+      b64 = await fileToB64(file); mime = file.type;
+    }
+    currentB64 = b64; currentMime = mime;
+
+    const imgEl = document.getElementById('docImg');
+    imgEl.src = 'data:' + mime + ';base64,' + b64;
+    document.getElementById('docFname').textContent = file.name;
+
+    setAnStep('Analisi Gemini AI...');
+    await analyze(b64, mime);
+
+    document.getElementById('analyzingBox').style.display = 'none';
+    document.getElementById('docPreview').style.display = 'flex';
+    document.getElementById('docPreview').style.flexDirection = 'column';
+
+  } catch(e) {
+    document.getElementById('analyzingBox').style.display = 'none';
+    dropZone.style.display = 'flex';
+    document.getElementById('placeholder').style.display = 'block';
+    alert('Errore: ' + e.message);
+  }
+}
+
+function setAnStep(txt) { document.getElementById('anStep').textContent = txt; }
+function setAnModel(txt) { document.getElementById('anModel').textContent = txt; }
+
+// ═══════════════════════════════════════
+// PDF → JPEG
+// ═══════════════════════════════════════
+async function pdfToJpeg(file) {
+  if(typeof pdfjsLib === 'undefined') {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+  }
+  const ab = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: new Uint8Array(ab), disableWorker: true}).promise;
+  const page = await pdf.getPage(1);
+  const vp = page.getViewport({scale: 2.5});
+  const canvas = document.createElement('canvas');
+  canvas.width = vp.width; canvas.height = vp.height;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'white'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  await page.render({canvasContext: ctx, viewport: vp}).promise;
+  return canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+}
+
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+function fileToB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Errore lettura file'));
+    r.readAsDataURL(file);
+  });
+}
+
+// ═══════════════════════════════════════
+// GEMINI ANALYZE — prova tutti i modelli
+// ═══════════════════════════════════════
+const PROMPT = `Sei un sistema di controllo qualità per l'entrata merci di Fresenius Kabi Italia S.R.L.
+
+Analizza questa immagine di un DDT (documento di trasporto) e rispondi SOLO con JSON valido, senza testo extra, senza backtick.
+
+{
+  "tipo_documento": "DDT_BANCALI oppure DDT_MATERIA_PRIMA oppure ALTRO",
+  "fornitore": "ragione sociale mittente o null",
+  "numero_ddt": "numero documento solo cifre/alfanumerico o null",
+  "data_documento": "formato GG/MM/AAAA o null",
+  "numero_ordine_sap": "10 cifre che iniziano con 45, o null",
+  "numero_ordine_fornitore": "es ORD.OC 687 o null",
+  "codice_articolo": "es EPAL.IM.P.E. o null",
+  "descrizione_articolo": "max 60 caratteri o null",
+  "quantita_totale": numero intero somma di tutte le righe o null,
+  "unita_misura": "PZ o KG o L o null",
+  "lotto_fornitore": "stringa o null",
+  "data_scadenza": "GG/MM/AAAA o null",
+  "confidenza": "ALTA o MEDIA o BASSA",
+  "anomalie": []
+}
+
+REGOLE:
+1. DDT_BANCALI = pallet/bancali/EPAL vuoti: lotto_fornitore=null, data_scadenza=null
+2. numero_ordine_sap: cerca 10 cifre con 45, spesso dopo "rif. ordine n."
+3. quantita_totale: somma tutte le righe, verifica con campo COLLI
+4. Solo JSON. Zero altro testo.`;
+
+async function analyze(b64, mime) {
+  const body = {
+    contents: [{parts: [
+      {inline_data: {mime_type: mime, data: b64}},
+      {text: PROMPT}
+    ]}],
+    generationConfig: {temperature: 0.1, maxOutputTokens: 1024}
+  };
+
+  // Prova prima activeModel, poi tutti gli altri
+  const order = activeModel
+    ? [activeModel, ...MODELS.filter(m => m !== activeModel)]
+    : MODELS;
+
+  let lastErr = '';
+  for(const model of order) {
+    setAnModel('Modello: ' + model);
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+      });
+
+      if(r.status === 429) { lastErr = 'rate_limit'; setAnModel('Rate limit, attendo...'); await new Promise(x=>setTimeout(x,3000)); continue; }
+      if(r.status === 400) {
+        const e = await r.json().catch(()=>({}));
+        if((e.error?.message||'').includes('not found')) { lastErr = 'not_found'; continue; }
+        throw new Error('Errore richiesta: ' + (e.error?.message || r.status));
+      }
+      if(!r.ok) { lastErr = 'http_' + r.status; continue; }
+
+      const data = await r.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if(!raw) { lastErr = 'empty'; setAnModel('Risposta vuota da ' + model); continue; }
+      const clean = raw.replace(/```json|```/g,'').trim();
+
+      let parsed;
+      try { parsed = JSON.parse(clean); }
+      catch(e) {
+        const m = clean.match(/\{[\s\S]+\}/);
+        if(m) { try { parsed = JSON.parse(m[0]); } catch(e2) { lastErr='json_parse'; continue; } }
+        else { lastErr='json_parse'; continue; }
+      }
+
+      activeModel = model;
+      document.getElementById('modelBadge').textContent = model;
+      extractedData = parsed;
+      renderFields(parsed);
+      return;
+
+    } catch(e) {
+      if(e.message.includes('JSON') || e.message.includes('richiesta')) throw e;
+      lastErr = e.message;
+      continue;
+    }
+  }
+
+  // Tutti falliti
+  if(lastErr === 'rate_limit') {
+    throw new Error('Rate limit Gemini. Attendi 2 minuti e clicca Rianalizza.');
+  }
+  throw new Error('Nessun modello disponibile. Controlla la connessione internet e riprova.');
+}
+
+async function reanalyze() {
+  if(!currentB64) return;
+  document.getElementById('docPreview').style.display = 'none';
+  document.getElementById('fieldsArea').style.display = 'none';
+  document.getElementById('analyzingBox').style.display = 'block';
+  setAnStep('Rianalisi...');
+  try {
+    await analyze(currentB64, currentMime);
+    document.getElementById('analyzingBox').style.display = 'none';
+    document.getElementById('docPreview').style.display = 'flex';
+    document.getElementById('docPreview').style.flexDirection = 'column';
+  } catch(e) {
+    document.getElementById('analyzingBox').style.display = 'none';
+    document.getElementById('docPreview').style.display = 'flex';
+    document.getElementById('docPreview').style.flexDirection = 'column';
+    setStatus('err','⚠️', e.message);
+    document.getElementById('fieldsArea').style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════
+// RENDER RISULTATI
+// ═══════════════════════════════════════
+function renderFields(d) {
+  const isBancali = d.tipo_documento === 'DDT_BANCALI';
+
+  const badge = document.getElementById('tipoBadge');
+  badge.style.display = 'inline-block';
+  badge.textContent = isBancali ? '📦 Bancali' : '💊 Materia Prima';
+
+  setField('f_fornitore', 'fc_fornitore', d.fornitore);
+  setField('f_nddt',      'fc_nddt',      d.numero_ddt);
+  setField('f_data',      'fc_data',      d.data_documento);
+  setField('f_sap',       'fc_sap',       d.numero_ordine_sap);
+  setField('f_ordforn',   'fc_ordforn',   d.numero_ordine_fornitore);
+  setField('f_codart',    'fc_codart',    d.codice_articolo);
+  setField('f_qty',       'fc_qty',       d.quantita_totale !== null ? String(d.quantita_totale) : null);
+
+  if(d.quantita_totale !== null) {
+    document.getElementById('fh_qty').textContent = '✓ ' + d.quantita_totale + ' ' + (d.unita_misura||'PZ');
+    document.getElementById('fh_qty').style.display = 'block';
+  }
+
+  // Validazione data documento
+  if(d.data_documento) {
+    const p = d.data_documento.split('/');
+    if(p.length===3) {
+      const dd = new Date(p[2], p[1]-1, p[0]);
+      const now = new Date(); now.setHours(0,0,0,0);
+      const back = new Date(now); back.setDate(now.getDate()-90);
+      const fwd  = new Date(now); fwd.setDate(now.getDate()+7);
+      if(dd < back || dd > fwd) {
+        document.getElementById('fc_data').classList.add('warn');
+        document.getElementById('fh_data').style.display = 'block';
+      }
+    }
+  }
+
+  // Validazione ordine SAP
+  if(d.numero_ordine_sap && !/^\d{8,12}$/.test(d.numero_ordine_sap.replace(/\s/g,''))) {
+    document.getElementById('fc_sap').classList.add('warn');
+    document.getElementById('fh_sap').style.display = 'block';
+  }
+
+  // Sezione lotto
+  document.getElementById('sec_lotto').style.display = isBancali ? 'none' : 'block';
+  if(!isBancali) {
+    setField('f_lotto', 'fc_lotto', d.lotto_fornitore);
+    setField('f_scad',  'fc_scad',  d.data_scadenza);
+    if(d.data_scadenza) {
+      const sp = d.data_scadenza.split('/');
+      if(sp.length===3) {
+        const sd = new Date(sp[2], sp[1]-1, sp[0]);
+        const now = new Date(); now.setHours(0,0,0,0);
+        if(sd < now) {
+          document.getElementById('fc_scad').classList.add('warn');
+          document.getElementById('fh_scad').style.display = 'block';
+        }
+      }
+    }
+    genLotto();
+  }
+
+  // Status
+  if(d.anomalie && d.anomalie.length > 0) {
+    setStatus('warn','⚠️','Attenzione: ' + d.anomalie.join(' · '));
+  } else if(d.confidenza === 'BASSA') {
+    setStatus('warn','⚠️','Confidenza bassa — verifica tutti i campi con attenzione');
+  } else {
+    setStatus('ok','✅','Estrazione completata · Verifica e copia per SAP');
+  }
+
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('fieldsArea').style.display = 'block';
+}
+
+function setField(inputId, cardId, val) {
+  const inp  = document.getElementById(inputId);
+  const card = document.getElementById(cardId);
+  card.classList.remove('ok','warn','na');
+  const dot = card.querySelector('.dot');
+  if(val === null || val === undefined || String(val).trim() === '') {
+    inp.value = '';
+    inp.placeholder = 'Non rilevato — inserisci manualmente';
+    inp.classList.add('na-val');
+    card.classList.add('warn');
+    if(dot) dot.className = 'dot dot-warn';
+  } else {
+    inp.value = String(val);
+    inp.placeholder = '';
+    inp.classList.remove('na-val');
+    card.classList.add('ok');
+    if(dot) dot.className = 'dot dot-ok';
+  }
+}
+
+function onEdit(el) {
+  const card = el.closest('.field');
+  if(el.value.trim()) {
+    card.classList.remove('warn'); card.classList.add('ok');
+    const dot = card.querySelector('.dot');
+    if(dot) dot.className = 'dot dot-ok';
+  }
+}
+
+function genLotto() {
+  const lotto = document.getElementById('f_lotto').value.trim();
+  const data  = document.getElementById('f_data').value.trim();
+  const box   = document.getElementById('fc_lottoint');
+  const val   = document.getElementById('lottoInterno');
+  if(lotto && data) {
+    const p = data.split('/');
+    const yy = p[2] ? p[2].slice(-2) : '';
+    const mm = p[1] ? p[1] : '';
+    val.textContent = 'FK' + yy + mm + lotto.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function setStatus(type, icon, msg) {
+  const sb = document.getElementById('statusBar');
+  sb.className = 'status-bar ' + type;
+  sb.innerHTML = `<span class="sico">${icon}</span><span class="stxt ${type}">${msg}</span>`;
+}
+
+// ═══════════════════════════════════════
+// COPIA PER SAP
+// ═══════════════════════════════════════
+function copyForSAP() {
+  const isBancali = extractedData?.tipo_documento === 'DDT_BANCALI';
+  const today = new Date().toLocaleDateString('it-IT');
+  const g = id => { const el=document.getElementById(id); return el?el.value.trim()||'—':'—'; };
+  const lottoInt = document.getElementById('lottoInterno')?.textContent || 'N/A';
+
+  const lines = [
+    '╔══════════════════════════════════════════╗',
+    '║    ENTRATA MERCI — ' + today.padEnd(22) + '║',
+    '╠══════════════════════════════════════════╣',
+    '║ Tipo        : ' + (isBancali?'Bancali / Pallet vuoti    ':'Materia Prima             ') + '║',
+    '║ Fornitore   : ' + g('f_fornitore').substring(0,26).padEnd(26) + '║',
+    '╠══════════════════════════════════════════╣',
+    '║ N° DDT      : ' + g('f_nddt').padEnd(26) + '║',
+    '║ Data DDT    : ' + g('f_data').padEnd(26) + '║',
+    '║ Ordine SAP  : ' + g('f_sap').padEnd(26) + '║',
+    '║ Ord. Forn.  : ' + g('f_ordforn').padEnd(26) + '║',
+    '╠══════════════════════════════════════════╣',
+    '║ Cod. Art.   : ' + g('f_codart').padEnd(26) + '║',
+    '║ Quantità    : ' + (g('f_qty')+' PZ').padEnd(26) + '║',
+    '║ Lotto forn. : ' + (isBancali?'N/A                       ':g('f_lotto').padEnd(26)) + '║',
+    '║ Lotto int.  : ' + (isBancali?'N/A                       ':lottoInt.padEnd(26)) + '║',
+    '║ Scadenza    : ' + (isBancali?'N/A                       ':g('f_scad').padEnd(26)) + '║',
+    '╚══════════════════════════════════════════╝',
+  ];
+
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const t = document.getElementById('toast');
+    t.style.display = 'block';
+    setTimeout(() => t.style.display='none', 3000);
+  }).catch(() => alert(lines.join('\n')));
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function toggleZoom() {
+  isZoomed = !isZoomed;
+  document.getElementById('docImgWrap').classList.toggle('zoomed', isZoomed);
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape'&&isZoomed) toggleZoom(); });
+
+function newDoc() {
+  currentB64=null; extractedData=null;
+  document.getElementById('dropZone').style.display='flex';
+  document.getElementById('docPreview').style.display='none';
+  document.getElementById('fieldsArea').style.display='none';
+  document.getElementById('placeholder').style.display='block';
+  document.getElementById('analyzingBox').style.display='none';
+  document.getElementById('tipoBadge').style.display='none';
+  fileInput.value='';
+}
+</script>
+</body>
+</html>
